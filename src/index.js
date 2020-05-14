@@ -1,13 +1,34 @@
 const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const dotenv = require("dotenv");
 
-const { info, error } = require("./modules/my-log");
+dotenv.config();
 
-const routes = require("./routes/routes");
+const routesV1 = require("./routes/v1");
 
 const app = express();
 
-routes(app);
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.listen(4000, () => {
-  //console.log("Running on port 4000");
-});
+// parse application/json
+app.use(bodyParser.json());
+
+routesV1(app);
+
+const PORT = process.env.PORT || 4000;
+
+mongoose
+  .connect(process.env.MONGO, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to Mongodb");
+    app.listen(PORT, () => {
+      console.log(`running on ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.log("mongodb error:", error);
+  });
