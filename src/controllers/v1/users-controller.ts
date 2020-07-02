@@ -1,10 +1,13 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const Users = require("../../mongo/models/users");
-const Products = require("../../mongo/models/products");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { Request, Response } from "express";
+
+import Users from "../../mongo/models/users";
+import Products from "../../mongo/models/products";
+
 const expiresIn = 60 * 10;
 
-const login = async (req, res) => {
+const login = async (req:Request, res:Response): Promise<void> => {
   try {
     const { email, password } = req.body;
     const user = await Users.findOne({ email });
@@ -13,7 +16,7 @@ const login = async (req, res) => {
       if (isOk) {
         const token = jwt.sign(
           { userId: user._id, role: user.role },
-          process.env.JWT_SECRET,
+          process.env.JWT_SECRET!,
           { expiresIn }
         );
         res.send({ status: "OK", data: { token, expiresIn } });
@@ -28,7 +31,7 @@ const login = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req:Request, res:Response): Promise<void> => {
   try {
     console.log("req.body", req.body);
 
@@ -36,12 +39,20 @@ const createUser = async (req, res) => {
 
     const hash = await bcrypt.hash(password, 15);
 
-    await Users.create({
-      userName,
-      email,
-      data,
-      password: hash,
-    });
+    //await Users.create({
+      //userName,
+      //email,
+      //data,
+      //password: hash,
+    //});
+
+    const user  = new Users();
+    user.userName = userName;
+    user.email = email;
+    user.password = hash;
+    user.data = data;
+
+    await user.save();
 
     res.send({ status: "OK", message: "user created" });
   } catch (error) {
@@ -56,7 +67,7 @@ const createUser = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req:Request, res:Response): Promise<void> => {
   try {
     const { userId } = req.body;
 
@@ -74,7 +85,7 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const getUsers = async (req, res) => {
+const getUsers = async (req:Request, res:Response): Promise<void> => {
   try {
     const users = await Users.find().select({ password: 0, __v: 0 });
     res.send({ status: "OK", data: users });
@@ -83,7 +94,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req:Request, res:Response): Promise<void> => {
   try {
     console.log("req.sessionData", req.sessionData.userId);
     const { userName, email, data } = req.body;
@@ -104,7 +115,7 @@ const updateUser = async (req, res) => {
   }
 };
 
-module.exports = {
+ export default {
   createUser,
   deleteUser,
   getUsers,

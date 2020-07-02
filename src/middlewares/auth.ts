@@ -1,6 +1,7 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
 
-const isValidHostName = (req, res, next) => {
+const isValidHostName = (req:Request, res:Response, next:NextFunction): void => {
   const validHosts = ["localhost", "fabri.es"];
   if (validHosts.includes(req.hostname)) {
     next();
@@ -9,11 +10,11 @@ const isValidHostName = (req, res, next) => {
   }
 };
 
-const isAuth = (req, res, next) => {
+const isAuth = (req:Request, res:Response, next:NextFunction): void => {
   try {
     const { token } = req.headers;
     if (token) {
-      const data = jwt.verify(token, process.env.JWT_SECRET);
+      const data: any = jwt.verify(token as string, process.env.JWT_SECRET!);
       if (data.userId !== req.body.userId && data.role !== "admin") {
         throw {
           code: 403,
@@ -37,7 +38,7 @@ const isAuth = (req, res, next) => {
   }
 };
 
-const isAdmin = (req, res, next) => {
+const isAdmin = (req:Request, res:Response, next:NextFunction): void => {
   try {
     const { role } = req.sessionData;
     console.log("is Admin", role);
@@ -56,4 +57,4 @@ const isAdmin = (req, res, next) => {
       .send({ status: error.status || "ERROR", message: error.message });
   }
 };
-module.exports = { isAuth, isValidHostName, isAdmin };
+export { isAuth, isValidHostName, isAdmin };
