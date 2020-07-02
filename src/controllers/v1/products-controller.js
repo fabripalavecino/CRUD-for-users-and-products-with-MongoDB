@@ -3,7 +3,7 @@ const Products = require("../../mongo/models/products");
 const createProduct = async (req, res) => {
   try {
     const { title, desc, price, images, userId } = req.body;
-    const product = await Product.create({
+    const product = await Products.create({
       title,
       desc,
       price,
